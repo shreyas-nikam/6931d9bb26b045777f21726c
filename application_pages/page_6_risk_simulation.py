@@ -5,29 +5,37 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
 def generate_mock_risk_score(df):
     """Generates a mock risk score (probability of default) for each loan application."""
     # Simple logic: higher risk for poor credit history, lower income relative to loan amount, etc.
     risk_score = pd.Series(0.0, index=df.index)
 
     # Factor 1: Credit History (most significant)
-    risk_score = risk_score + (1 - df["Credit_History"].fillna(0.5)) * 0.4 # Lower credit history -> higher risk
+    # Lower credit history -> higher risk
+    risk_score = risk_score + (1 - df["Credit_History"].fillna(0.5)) * 0.4
 
     # Factor 2: Income to Loan Amount Ratio
     # Avoid division by zero for LoanAmount, replace with a small epsilon or 1 for safety
-    loan_to_income_ratio = df["LoanAmount"] / (df["ApplicantIncome"] + df["CoapplicantIncome"] + 1e-6)
-    risk_score = risk_score + np.clip(loan_to_income_ratio * 0.1, 0, 0.3) # Higher ratio -> higher risk, capped
+    loan_to_income_ratio = df["LoanAmount"] / \
+        (df["ApplicantIncome"] + df["CoapplicantIncome"] + 1e-6)
+    # Higher ratio -> higher risk, capped
+    risk_score = risk_score + np.clip(loan_to_income_ratio * 0.1, 0, 0.3)
 
     # Factor 3: Education
-    risk_score = risk_score + df["Education"].apply(lambda x: 0.05 if x == "Not Graduate" else 0.0)
+    risk_score = risk_score + \
+        df["Education"].apply(lambda x: 0.05 if x == "Not Graduate" else 0.0)
 
     # Factor 4: Dependents
-    risk_score = risk_score + df["Dependents"].replace({"3+": "3"}).astype(float) * 0.02 # More dependents -> slightly higher risk
+    # More dependents -> slightly higher risk
+    risk_score = risk_score + \
+        df["Dependents"].replace({"3+": "3"}).astype(float) * 0.02
 
     # Ensure risk score is between 0 and 1
     risk_score = np.clip(risk_score, 0.0, 1.0)
 
     return risk_score
+
 
 def main():
     st.markdown("### Step 6: Risk Simulation & Human Oversight")
@@ -41,7 +49,8 @@ def main():
     """)
 
     if st.session_state.cleaned_data is None:
-        st.warning("No cleaned data available. Please go to 'Data Cleaning and Preprocessing' to prepare the data.")
+        st.warning(
+            "No cleaned data available. Please go to 'Data Cleaning and Preprocessing' to prepare the data.")
         if st.button("Go to Data Cleaning and Preprocessing"):
             st.session_state.current_page = "4. Data Cleaning and Preprocessing"
             st.rerun()
@@ -68,7 +77,7 @@ def main():
             min_value=0, max_value=20, value=5, step=1,
             help="Simulate slight fluctuations or errors in loan amount requests."
         )
-    
+
     # Add a mock credit history noise parameter
     credit_history_noise_level = st.slider(
         "Credit History Data Noise (Probability of Falsification/Error):",
@@ -90,20 +99,26 @@ def main():
         simulated_df = df_cleaned.copy()
 
         # Introduce uncertainty into numerical features
-        simulated_df["ApplicantIncome"] = simulated_df["ApplicantIncome"] * (1 + np.random.uniform(-income_uncertainty_percent/100, income_uncertainty_percent/100, len(simulated_df)))
-        simulated_df["LoanAmount"] = simulated_df["LoanAmount"] * (1 + np.random.uniform(-loan_amount_uncertainty_percent/100, loan_amount_uncertainty_percent/100, len(simulated_df)))
+        simulated_df["ApplicantIncome"] = simulated_df["ApplicantIncome"] * \
+            (1 + np.random.uniform(-income_uncertainty_percent/100,
+             income_uncertainty_percent/100, len(simulated_df)))
+        simulated_df["LoanAmount"] = simulated_df["LoanAmount"] * (1 + np.random.uniform(
+            -loan_amount_uncertainty_percent/100, loan_amount_uncertainty_percent/100, len(simulated_df)))
 
         # Introduce noise into Credit_History
         if "Credit_History" in simulated_df.columns:
-            noise_mask = np.random.rand(len(simulated_df)) < credit_history_noise_level
+            noise_mask = np.random.rand(
+                len(simulated_df)) < credit_history_noise_level
             # Flip 0 to 1, or 1 to 0 for noise. Handle NaN by keeping them NaN or defaulting.
-            simulated_df.loc[noise_mask & (simulated_df["Credit_History"] == 0.0), "Credit_History"] = 1.0
-            simulated_df.loc[noise_mask & (simulated_df["Credit_History"] == 1.0), "Credit_History"] = 0.0
+            simulated_df.loc[noise_mask & (
+                simulated_df["Credit_History"] == 0.0), "Credit_History"] = 1.0
+            simulated_df.loc[noise_mask & (
+                simulated_df["Credit_History"] == 1.0), "Credit_History"] = 0.0
             # If Credit_History was NaN and noise_mask is True, it remains NaN here, which is fine.
 
-
         # Generate mock risk scores based on the (potentially perturbed) data
-        simulated_df["Simulated_Risk_Score"] = generate_mock_risk_score(simulated_df)
+        simulated_df["Simulated_Risk_Score"] = generate_mock_risk_score(
+            simulated_df)
 
         # Determine loan status based on a simple threshold for demonstration
         # For simplicity, let's say a low risk score leads to "Y" (Approved), high to "N" (Rejected)
@@ -139,11 +154,14 @@ def main():
         """)
 
         # Display counts of flagged cases
-        flagged_counts = st.session_state.simulated_results["Flagged_for_Human_Review"].value_counts().to_frame()
-        st.dataframe(flagged_counts.rename(columns={"count": "Number of Applications"}))
+        flagged_counts = st.session_state.simulated_results["Flagged_for_Human_Review"].value_counts(
+        ).to_frame()
+        st.dataframe(flagged_counts.rename(
+            columns={"count": "Number of Applications"}))
 
         fig_flagged, ax_flagged = plt.subplots(figsize=(8, 5))
-        sns.countplot(x="Flagged_for_Human_Review", data=st.session_state.simulated_results, palette="coolwarm", ax=ax_flagged)
+        sns.countplot(x="Flagged_for_Human_Review",
+                      data=st.session_state.simulated_results, palette="coolwarm", ax=ax_flagged)
         ax_flagged.set_title("Applications Flagged for Human Review")
         ax_flagged.set_xlabel("Flagged for Human Review")
         ax_flagged.set_ylabel("Number of Applications")
@@ -166,13 +184,12 @@ def main():
             These are example cases that, under the simulated conditions and given your defined human review threshold, have been flagged for your personal oversight. For each of these, you would typically delve deeper into the applicant's full profile to make a final, informed decision.
             """)
         else:
-            st.info("No applications were flagged for human review under the current simulation parameters and threshold.")
+            st.info(
+                "No applications were flagged for human review under the current simulation parameters and threshold.")
 
         st.markdown("""
         --- 
         **Risk Manager's Action:** You have successfully simulated risk and identified cases requiring human oversight. This process validates the model's behavior under stress and reinforces the importance of human-in-the-loop decision-making for high-risk scenarios. This forms a crucial part of your assurance case.
         """)
 
-    if st.button("Proceed to Risk Register & Governance"):
-        st.session_state.current_page = "7. Risk Register & Governance"
-        st.rerun()
+    st.info("✅ Ready to move forward? Use the sidebar navigation to proceed to **Step 7: Risk Register & Governance**.", icon="ℹ️")

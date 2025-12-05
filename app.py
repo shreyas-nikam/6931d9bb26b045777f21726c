@@ -35,29 +35,44 @@ if "cleaned_data" not in st.session_state:
     st.session_state.cleaned_data = None
 if "metadata" not in st.session_state:
     st.session_state.metadata = pd.DataFrame(
-        columns=["Attribute", "Description", "Source", "Last Updated", "Provenance Log"]
+        columns=["Attribute", "Description", "Source",
+                 "Last Updated", "Provenance Log"]
     )
 if "provenance_logs" not in st.session_state:
     st.session_state.provenance_logs = pd.DataFrame(
         columns=["Timestamp", "Action", "Description", "User"]
     )
 if "bias_metrics" not in st.session_state:
-    st.session_state.bias_metrics = None
+    st.session_state.bias_metrics = {}
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "1. Data Ingestion & Overview"
 
+# List of page options
+page_options = [
+    "1. Data Ingestion & Overview",
+    "2. Data Provenance & Metadata Management",
+    "3. Data Quality Audits",
+    "4. Data Cleaning and Preprocessing",
+    "5. Bias Detection & Analysis",
+    "6. Risk Simulation & Human Oversight",
+    "7. Risk Register & Governance",
+    "8. Audit Report & Insights"
+]
+
+# Get the index of the current page
+current_index = page_options.index(
+    st.session_state.current_page) if st.session_state.current_page in page_options else 0
 
 page = st.sidebar.selectbox(
     label="Navigation",
-    options=[
-        "1. Data Ingestion & Overview",
-        "2. Data Provenance & Metadata Management",
-        "3. Data Quality Audits",
-        "4. Data Cleaning and Preprocessing",
-        "5. Bias Detection & Analysis",
-        "6. Risk Simulation & Human Oversight",
-        "7. Risk Register & Governance",
-        "8. Audit Report & Insights"
-    ]
+    options=page_options,
+    index=current_index,
+    key="page_selector"
 )
+
+# Update current_page when selectbox changes
+if page != st.session_state.current_page:
+    st.session_state.current_page = page
 
 if page == "1. Data Ingestion & Overview":
     from application_pages.page_1_data_ingestion import main

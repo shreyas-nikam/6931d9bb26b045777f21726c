@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import datetime
 
+
 def main():
     st.markdown("### Step 7: Risk Register & Governance")
 
@@ -40,11 +41,14 @@ def main():
     """)
 
     with st.form("new_risk_form"):
-        risk_id = st.text_input("Risk ID:", value=f"MR_{len(st.session_state.risk_register) + 1:03d}")
-        risk_name = st.text_input("Risk Name (e.g., 'Gender Bias in Loan Approval'):")
+        risk_id = st.text_input(
+            "Risk ID:", value=f"MR_{len(st.session_state.risk_register) + 1:03d}")
+        risk_name = st.text_input(
+            "Risk Name (e.g., 'Gender Bias in Loan Approval'):")
         category = st.selectbox(
             "Category:",
-            options=["Data Quality", "Bias", "Model Performance", "Compliance", "Operational"],
+            options=["Data Quality", "Bias", "Model Performance",
+                     "Compliance", "Operational"],
             index=0,
             key="risk_category"
         )
@@ -68,7 +72,8 @@ def main():
             index=0,
             key="risk_status"
         )
-        owner = st.text_input("Owner (e.g., 'Head of Model Risk'):", value="Risk_Manager_001")
+        owner = st.text_input(
+            "Owner (e.g., 'Head of Model Risk'):", value="Risk_Manager_001")
 
         submitted = st.form_submit_button("Add Risk to Register")
         if submitted:
@@ -76,7 +81,7 @@ def main():
                 # Map likelihood and impact to numerical values for score calculation
                 likelihood_map = {"Low": 1, "Medium": 2, "High": 3}
                 impact_map = {"Low": 1, "Medium": 2, "High": 3}
-                
+
                 risk_score = likelihood_map[likelihood] * impact_map[impact]
 
                 new_risk_entry = {
@@ -93,10 +98,12 @@ def main():
                     "Date Identified": datetime.datetime.now().strftime("%Y-%m-%d")
                 }
                 st.session_state.risk_register = pd.concat(
-                    [st.session_state.risk_register, pd.DataFrame([new_risk_entry])],
+                    [st.session_state.risk_register,
+                        pd.DataFrame([new_risk_entry])],
                     ignore_index=True
                 )
-                st.success(f"Risk '{risk_name}' added to the register with Risk Score: {risk_score}!")
+                st.success(
+                    f"Risk '{risk_name}' added to the register with Risk Score: {risk_score}!")
                 st.dataframe(st.session_state.risk_register)
 
                 # Update provenance logs
@@ -107,17 +114,17 @@ def main():
                     "User": "Risk_Manager_001"
                 }
                 st.session_state.provenance_logs = pd.concat(
-                    [st.session_state.provenance_logs, pd.DataFrame([new_log_entry])],
+                    [st.session_state.provenance_logs,
+                        pd.DataFrame([new_log_entry])],
                     ignore_index=True
                 )
             else:
-                st.warning("Please fill in all required fields (Risk Name, Description, Mitigation Strategy).")
+                st.warning(
+                    "Please fill in all required fields (Risk Name, Description, Mitigation Strategy).")
 
     st.markdown("""
     --- 
     **Risk Manager's Insight:** By maintaining a detailed risk register, you're not just identifying problems; you're actively contributing to the institution's robust model governance framework. This documentation is crucial for internal reviews and external regulatory compliance, demonstrating a proactive approach to managing AI-related risks.
     """)
 
-    if st.button("Proceed to Audit Report & Insights"):
-        st.session_state.current_page = "8. Audit Report & Insights"
-        st.rerun()
+    st.info("✅ Ready to move forward? Use the sidebar navigation to proceed to **Step 8: Audit Report & Insights**.", icon="ℹ️")

@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
 def main():
     st.markdown("### Step 3: Data Quality Audits")
 
@@ -24,12 +25,15 @@ def main():
         **Risk Manager's Action:** Review the visual representation of missing values. A high percentage of missing data in critical features can indicate a significant data quality risk that needs immediate attention.
         """)
         missing_data = df.isnull().sum().to_frame(name="Missing Count")
-        missing_data["Missing Percentage"] = (missing_data["Missing Count"] / len(df)) * 100
-        missing_data = missing_data[missing_data["Missing Count"] > 0].sort_values(by="Missing Percentage", ascending=False)
+        missing_data["Missing Percentage"] = (
+            missing_data["Missing Count"] / len(df)) * 100
+        missing_data = missing_data[missing_data["Missing Count"] > 0].sort_values(
+            by="Missing Percentage", ascending=False)
 
         if not missing_data.empty:
             fig_missing, ax_missing = plt.subplots(figsize=(10, 6))
-            sns.barplot(x=missing_data.index, y="Missing Percentage", data=missing_data, ax=ax_missing, palette="viridis")
+            sns.barplot(x=missing_data.index, y="Missing Percentage",
+                        data=missing_data, ax=ax_missing, palette="viridis")
             ax_missing.set_title("Percentage of Missing Values Per Feature")
             ax_missing.set_ylabel("Missing Percentage (%)")
             ax_missing.set_xlabel("Features")
@@ -50,7 +54,7 @@ def main():
         """)
 
         numerical_cols = df.select_dtypes(include=np.number).columns.tolist()
-        if "Loan_Amount_Term" in numerical_cols: # Exclude if it's more categorical than numerical in context
+        if "Loan_Amount_Term" in numerical_cols:  # Exclude if it's more categorical than numerical in context
             numerical_cols.remove("Loan_Amount_Term")
 
         if numerical_cols:
@@ -72,11 +76,10 @@ def main():
         **Risk Manager's Insight:** You've now identified critical data quality issues: missing values and outliers. These findings directly inform the necessity of data cleaning and preprocessing steps to ensure the data is fit for model consumption and that model risk is minimized.
         """)
 
-        if st.button("Proceed to Data Cleaning and Preprocessing"):
-            st.session_state.current_page = "4. Data Cleaning and Preprocessing"
-            st.rerun()
+        st.info("✅ Ready to move forward? Use the sidebar navigation to proceed to **Step 4: Data Cleaning and Preprocessing**.", icon="ℹ️")
     else:
-        st.warning("Please ingest data first on the 'Data Ingestion & Overview' page.")
+        st.warning(
+            "Please ingest data first on the 'Data Ingestion & Overview' page.")
         if st.button("Go to Data Ingestion & Overview"):
             st.session_state.current_page = "1. Data Ingestion & Overview"
             st.rerun()

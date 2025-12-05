@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
 def main():
     st.markdown("### Step 4: Data Cleaning and Preprocessing")
 
@@ -17,7 +18,8 @@ def main():
     """)
 
     if st.session_state.raw_data is None:
-        st.warning("No raw data available. Please go to 'Data Ingestion & Overview' to load the data.")
+        st.warning(
+            "No raw data available. Please go to 'Data Ingestion & Overview' to load the data.")
         if st.button("Go to Data Ingestion & Overview"):
             st.session_state.current_page = "1. Data Ingestion & Overview"
             st.rerun()
@@ -41,11 +43,11 @@ def main():
         col_type = df[col].dtype
         if pd.api.types.is_numeric_dtype(col_type):
             options = ["Median", "Mean", "Remove Rows"]
-            default_index = options.index("Median") # Use index for default
+            default_index = options.index("Median")  # Use index for default
         else:
             options = ["Mode", "Remove Rows"]
-            default_index = options.index("Mode") # Use index for default
-        
+            default_index = options.index("Mode")  # Use index for default
+
         strategy = st.selectbox(
             f"Select imputation strategy for **`{col}`**:",
             options=options,
@@ -53,7 +55,7 @@ def main():
             key=f"impute_{col}"
         )
         imputation_strategies[col] = strategy
-    
+
     st.markdown(r"""
     For numerical features like `LoanAmount`, replacing missing values with the **median** avoids skewing the distribution with extreme values that a mean might introduce. If the data for `ApplicantIncome` is missing, using the median ensures that the imputed values are typical for the dataset. For categorical features such as `Gender` or `Married`, using the **mode** (most frequent category) is a common strategy to maintain the overall distribution of categories. Removing rows with missing values can lead to data loss and potential sampling bias if missingness is not random.
     """)
@@ -64,13 +66,15 @@ def main():
     """)
 
     numerical_cols = df.select_dtypes(include=np.number).columns.tolist()
-    if "Loan_Amount_Term" in numerical_cols: 
-        numerical_cols.remove("Loan_Amount_Term") # Often treated as categorical
+    if "Loan_Amount_Term" in numerical_cols:
+        # Often treated as categorical
+        numerical_cols.remove("Loan_Amount_Term")
 
     outlier_handling_strategy = st.selectbox(
         "Select outlier handling strategy:",
-        options=["None", "Cap Outliers (IQR Method)", "Remove Outliers (IQR Method)"],
-        index=1, # Default to capping
+        options=["None", "Cap Outliers (IQR Method)",
+                 "Remove Outliers (IQR Method)"],
+        index=1,  # Default to capping
         key="outlier_strategy"
     )
 
@@ -94,21 +98,25 @@ def main():
             if strategy == "Median":
                 median_val = cleaned_df[col].median()
                 cleaned_df[col].fillna(median_val, inplace=True)
-                log_entries.append(f"Imputed missing values in `{col}` with median ({median_val}).")
+                log_entries.append(
+                    f"Imputed missing values in `{col}` with median ({median_val}).")
             elif strategy == "Mean":
                 mean_val = cleaned_df[col].mean()
                 cleaned_df[col].fillna(mean_val, inplace=True)
-                log_entries.append(f"Imputed missing values in `{col}` with mean ({mean_val}).")
+                log_entries.append(
+                    f"Imputed missing values in `{col}` with mean ({mean_val}).")
             elif strategy == "Mode":
                 mode_val = cleaned_df[col].mode()[0]
                 cleaned_df[col].fillna(mode_val, inplace=True)
-                log_entries.append(f"Imputed missing values in `{col}` with mode ({mode_val}).")
+                log_entries.append(
+                    f"Imputed missing values in `{col}` with mode ({mode_val}).")
             elif strategy == "Remove Rows":
                 initial_rows = len(cleaned_df)
                 cleaned_df.dropna(subset=[col], inplace=True)
                 rows_removed = initial_rows - len(cleaned_df)
-                log_entries.append(f"Removed {rows_removed} rows with missing values in `{col}`.")
-        
+                log_entries.append(
+                    f"Removed {rows_removed} rows with missing values in `{col}`.")
+
         # Apply outlier handling
         if outlier_handling_strategy != "None":
             for col in numerical_cols:
@@ -121,17 +129,22 @@ def main():
                 if outlier_handling_strategy == "Cap Outliers (IQR Method)":
                     num_capped_lower = (cleaned_df[col] < lower_bound).sum()
                     num_capped_upper = (cleaned_df[col] > upper_bound).sum()
-                    cleaned_df[col] = np.where(cleaned_df[col] < lower_bound, lower_bound, cleaned_df[col])
-                    cleaned_df[col] = np.where(cleaned_df[col] > upper_bound, upper_bound, cleaned_df[col])
+                    cleaned_df[col] = np.where(
+                        cleaned_df[col] < lower_bound, lower_bound, cleaned_df[col])
+                    cleaned_df[col] = np.where(
+                        cleaned_df[col] > upper_bound, upper_bound, cleaned_df[col])
                     if num_capped_lower > 0 or num_capped_upper > 0:
-                        log_entries.append(f"Capped {num_capped_lower} lower and {num_capped_upper} upper outliers in `{col}` using IQR multiplier {iqr_multiplier}.")
+                        log_entries.append(
+                            f"Capped {num_capped_lower} lower and {num_capped_upper} upper outliers in `{col}` using IQR multiplier {iqr_multiplier}.")
                 elif outlier_handling_strategy == "Remove Outliers (IQR Method)":
                     initial_rows = len(cleaned_df)
-                    cleaned_df = cleaned_df[~((cleaned_df[col] < lower_bound) | (cleaned_df[col] > upper_bound))]
+                    cleaned_df = cleaned_df[~(
+                        (cleaned_df[col] < lower_bound) | (cleaned_df[col] > upper_bound))]
                     rows_removed = initial_rows - len(cleaned_df)
                     if rows_removed > 0:
-                        log_entries.append(f"Removed {rows_removed} rows containing outliers in `{col}` using IQR multiplier {iqr_multiplier}.")
-        
+                        log_entries.append(
+                            f"Removed {rows_removed} rows containing outliers in `{col}` using IQR multiplier {iqr_multiplier}.")
+
         st.session_state.cleaned_data = cleaned_df.reset_index(drop=True)
         st.success("Data cleaning and preprocessing applied successfully!")
 
@@ -162,13 +175,15 @@ def main():
             "Before Cleaning": missing_before,
             "After Cleaning": missing_after
         }).loc[missing_before > 0]
-        
+
         if not comparison_df.empty:
             st.dataframe(comparison_df)
         else:
-            st.info("No missing values were present or all were successfully handled.")
+            st.info(
+                "No missing values were present or all were successfully handled.")
 
-        st.markdown("#### Comparison: Descriptive Statistics (Numerical Features)")
+        st.markdown(
+            "#### Comparison: Descriptive Statistics (Numerical Features)")
         st.markdown("""
         **Risk Manager's Insight:** Observe how the descriptive statistics (mean, max, min, std) for numerical features have changed after outlier handling. Significant changes might indicate effective outlier mitigation, leading to a more stable dataset for modeling. However, be cautious that overly aggressive cleaning can remove valuable information.
         """)
@@ -180,6 +195,4 @@ def main():
     **Risk Manager's Insight:** You've successfully applied data cleaning strategies, addressing missing values and outliers. This refined dataset is now more robust and less prone to introducing biases or errors into the model. These steps are crucial for maintaining the integrity of the model audit trail.
     """)
 
-    if st.button("Proceed to Bias Detection & Analysis"):
-        st.session_state.current_page = "5. Bias Detection & Analysis"
-        st.rerun()
+    st.info("✅ Ready to move forward? Use the sidebar navigation to proceed to **Step 5: Bias Detection & Analysis**.", icon="ℹ️")

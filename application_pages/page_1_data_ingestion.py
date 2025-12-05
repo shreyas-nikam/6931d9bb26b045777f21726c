@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
+
 def main():
     st.markdown("### Step 1: Data Ingestion & Overview")
 
@@ -36,7 +37,8 @@ def main():
         df = pd.DataFrame(data)
         # Introduce some missing values intentionally for demonstration
         for col in ["Gender", "Married", "Dependents", "Self_Employed", "LoanAmount", "Credit_History"]:
-            missing_indices = np.random.choice(df.index, int(num_records * 0.05), replace=False)
+            missing_indices = np.random.choice(
+                df.index, int(num_records * 0.05), replace=False)
             df.loc[missing_indices, col] = np.nan
 
         st.session_state.raw_data = df.copy()
@@ -49,8 +51,10 @@ def main():
 
     st.markdown("#### Missing Values Overview")
     missing_data = st.session_state.raw_data.isnull().sum().to_frame(name="Missing Count")
-    missing_data["Missing Percentage"] = (missing_data["Missing Count"] / len(st.session_state.raw_data)) * 100
-    st.dataframe(missing_data[missing_data["Missing Count"] > 0].sort_values(by="Missing Percentage", ascending=False))
+    missing_data["Missing Percentage"] = (
+        missing_data["Missing Count"] / len(st.session_state.raw_data)) * 100
+    st.dataframe(missing_data[missing_data["Missing Count"] > 0].sort_values(
+        by="Missing Percentage", ascending=False))
 
     st.markdown("""
     --- 
@@ -58,6 +62,4 @@ def main():
     """)
 
     # Navigation to the next stage
-    if st.button("Proceed to Data Provenance & Metadata Management"):
-        st.session_state.current_page = "2. Data Provenance & Metadata Management"
-        st.rerun()
+    st.info("✅ Ready to move forward? Use the sidebar navigation to proceed to **Step 2: Data Provenance & Metadata Management**.", icon="ℹ️")

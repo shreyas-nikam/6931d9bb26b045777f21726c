@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import datetime
 
+
 def main():
     st.markdown("### Step 2: Data Provenance & Metadata Management")
 
@@ -25,7 +26,8 @@ def main():
     **Risk Manager's Action:** Document any significant actions taken on the data, its source, or any transformations. This log is crucial for maintaining a verifiable audit trail.
     """)
 
-    action_description = st.text_area("Describe the data action or lineage event (e.g., "Initial data load from core banking system", "Schema validation performed"):")
+    action_description = st.text_area(
+        f"Describe the data action or lineage event (e.g., \"Initial data load from core banking system\", \"Schema validation performed\"):")
     user_name = st.text_input("Your Name/User ID:", value="Risk_Manager_001")
 
     if st.button("Add to Provenance Log"):
@@ -37,19 +39,18 @@ def main():
                 "User": user_name
             }
             st.session_state.provenance_logs = pd.concat(
-                [st.session_state.provenance_logs, pd.DataFrame([new_log_entry])],
+                [st.session_state.provenance_logs,
+                    pd.DataFrame([new_log_entry])],
                 ignore_index=True
             )
             st.success("Provenance log updated successfully!")
-            st.dataframe(st.session_state.provenance_logs) # Display updated logs immediately
+            # Display updated logs immediately
+            st.dataframe(st.session_state.provenance_logs)
         else:
             st.warning("Please provide a description for the data action.")
 
     st.markdown("""
-    --- 
     **Risk Manager's Insight:** By maintaining meticulous logs, you are building an undeniable record of data handling, which is paramount for justifying model decisions and meeting regulatory requirements.
     """)
 
-    if st.button("Proceed to Data Quality Audits"):
-        st.session_state.current_page = "3. Data Quality Audits"
-        st.rerun()
+    st.info("✅ Ready to move forward? Use the sidebar navigation to proceed to **Step 3: Data Quality Audits**.", icon="ℹ️")
