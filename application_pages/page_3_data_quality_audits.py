@@ -56,13 +56,22 @@ def main():
         numerical_cols = df.select_dtypes(include=np.number).columns.tolist()
         if "Loan_Amount_Term" in numerical_cols:  # Exclude if it's more categorical than numerical in context
             numerical_cols.remove("Loan_Amount_Term")
+        if "Credit_History" in numerical_cols:
+            numerical_cols.remove("Credit_History")
 
         if numerical_cols:
-            for col in numerical_cols:
-                st.markdown(f"##### Outliers in `{col}`")
+            selected_col = st.selectbox(
+                "Select a numerical column to detect outliers:",
+                options=numerical_cols,
+                key="outlier_column_selector"
+            )
+
+            if selected_col:
+                st.markdown(f"##### Outliers in `{selected_col}`")
                 fig_outlier, ax_outlier = plt.subplots(figsize=(8, 4))
-                sns.boxplot(x=df[col], ax=ax_outlier, palette="rocket")
-                ax_outlier.set_title(f"Box Plot of {col}")
+                sns.boxplot(x=df[selected_col],
+                            ax=ax_outlier, palette="rocket")
+                ax_outlier.set_title(f"Box Plot of {selected_col}")
                 st.pyplot(fig_outlier)
                 st.markdown(r"""
                 The box plot above visualizes the distribution of data for a numerical feature. Points extending significantly beyond the "whiskers" of the box are considered outliers. These often represent extreme values that might be data entry errors or genuine, but unusual, observations. For instance, in `ApplicantIncome`, unusually high incomes might be outliers. These outliers can inflate variance and affect statistical significance, potentially misleading the model's understanding of typical loan applicant behavior.

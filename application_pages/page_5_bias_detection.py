@@ -70,6 +70,8 @@ def main():
     # Remove Loan_ID if present
     if "Loan_ID" in categorical_cols:
         categorical_cols.remove("Loan_ID")
+    if "Loan_Status" in categorical_cols:
+        categorical_cols.remove("Loan_Status")
 
     if not categorical_cols:
         st.error("No categorical features available for bias analysis.")
@@ -190,6 +192,14 @@ def main():
             continuous_numerical_cols.append(col)
 
     numerical_cols = continuous_numerical_cols
+
+    # Remove Loan_Amount from numerical features
+    if "Loan_Status" in numerical_cols:
+        numerical_cols.remove("Loan_Status")
+    if "LoanAmount" in numerical_cols:
+        numerical_cols.remove("LoanAmount")
+    if "Loan_Amount" in numerical_cols:
+        numerical_cols.remove("Loan_Amount")
 
     if numerical_cols:
         # Default to ApplicantIncome if available

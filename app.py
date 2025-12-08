@@ -10,7 +10,6 @@ st.title("QuLab: ML Model Risk Auditing")
 st.divider()
 
 st.markdown("""
-### Welcome, Risk Manager!
 
 As a **Risk Manager** at a leading financial institution, your critical role is to ensure the integrity, fairness, and compliance of machine learning models used in sensitive areas like loan underwriting. Automated decisions, while efficient, carry inherent risks, including potential biases, lack of transparency, and non-compliance with regulatory standards. Your mission in this lab is to conduct a thorough **data provenance and risk audit** of an ML loan underwriting model.
 
