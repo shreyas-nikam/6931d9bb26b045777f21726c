@@ -51,9 +51,6 @@ def main():
     if st.session_state.cleaned_data is None:
         st.warning(
             "No cleaned data available. Please go to 'Data Cleaning and Preprocessing' to prepare the data.")
-        if st.button("Go to Data Cleaning and Preprocessing"):
-            st.session_state.current_page = "4. Data Cleaning and Preprocessing"
-            st.rerun()
         return
 
     df_cleaned = st.session_state.cleaned_data.copy()

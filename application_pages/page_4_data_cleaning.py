@@ -20,9 +20,6 @@ def main():
     if st.session_state.raw_data is None:
         st.warning(
             "No raw data available. Please go to 'Data Ingestion & Overview' to load the data.")
-        if st.button("Go to Data Ingestion & Overview"):
-            st.session_state.current_page = "1. Data Ingestion & Overview"
-            st.rerun()
         return
 
     df = st.session_state.raw_data.copy()

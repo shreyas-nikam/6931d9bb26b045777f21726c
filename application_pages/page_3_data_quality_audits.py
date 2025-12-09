@@ -89,6 +89,3 @@ def main():
     else:
         st.warning(
             "Please ingest data first on the 'Data Ingestion & Overview' page.")
-        if st.button("Go to Data Ingestion & Overview"):
-            st.session_state.current_page = "1. Data Ingestion & Overview"
-            st.rerun()
